@@ -46,7 +46,7 @@ sub run() {
     print STDERR "Discarded $discarded non-spanning reads\n";
     print STDERR "Evaluated $spanning_counts spanning reads\n";
     for my $variant (sort keys %variant_counts) {
-        printf "%s\t%d\t%d\t%f\n", $variant, $variant_counts{$variant}, $spanning_counts, $variant_counts{$variant} / $spanning_counts;
+        printf "%s\t%d\t%d\t%f%%\n", $variant, $variant_counts{$variant}, $spanning_counts, $variant_counts{$variant} / $spanning_counts * 100;
     }
 }
 
@@ -72,7 +72,8 @@ sub valid {
     for my $base (@bases) {
         if( !defined $base
             || $base eq ''
-            || $base eq 'N' ) {
+            #|| $base eq 'N' 
+            ) {
             return 0;
         }
     }
