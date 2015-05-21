@@ -13,6 +13,7 @@ sub run() {
     my %variant_counts;
     my $discarded = 0;
     my $spanning_counts = 0;
+    my @position_counts;
 
     while(<>) {
         $_ =~ s/\R$//g;
@@ -31,11 +32,19 @@ sub run() {
         }
         else {
             $discarded += 1;
-            next;
+        }
+        for my $index (0..$#bases) {
+            $position_counts[$index]->{$bases[$index]} += 1;
         }
     }
-    print STDOUT "Discarded $discarded non-spanning reads\n";
-    print STDOUT "Evaluated $spanning_counts spanning reads\n";
+    for(my $index = 0; $index < @$variants; ++$index) {
+        print STDERR $variants->[$index]->{id}, ":\n";
+        for my $base (keys %{$position_counts[$index]}) {
+            print STDERR "\t$base\t$position_counts[$index]->{$base}\n";
+        }
+    }
+    print STDERR "Discarded $discarded non-spanning reads\n";
+    print STDERR "Evaluated $spanning_counts spanning reads\n";
     for my $variant (sort keys %variant_counts) {
         printf "%s\t%d\t%d\t%f\n", $variant, $variant_counts{$variant}, $spanning_counts, $variant_counts{$variant} / $spanning_counts;
     }
