@@ -6,11 +6,13 @@ __PACKAGE__->run() unless caller();
 use strict;
 use warnings;
 use List::MoreUtils qw(pairwise);
+use IO::File;
 
 sub run() {
     my $class = shift;
     my $variants;
     my %variant_counts;
+    my %file_handles;
     my $discarded = 0;
     my $spanning_counts = 0;
     my @position_counts;
@@ -27,6 +29,7 @@ sub run() {
             if(@variant_in_read) {
                 my $name = join(",", map {$_->{id}} @variant_in_read);
                 $variant_counts{$name} += 1;
+                $class->print_readname(\%file_handles, $name, $read_name);
             }
             $spanning_counts += 1;
         }
@@ -94,4 +97,26 @@ sub variants_in_read {
     my @variant_vector = grep { $_ } pairwise { $class->variant_for_base($a, $b) } @$variant_array, @bases;
     return @variant_vector;
 }
-        
+
+sub create_readname_filename {
+    my ($class, $variant_name) = @_;
+    my $filename = $variant_name;
+    $filename =~ s/,/_/g;
+    $filename .= "_readnames.txt";
+    return $filename;
+}
+
+sub print_readname {
+    my ($class, $filehandles_hashref, $variant_name, $readname) = @_;
+    my $fh;
+    unless(exists $filehandles_hashref->{$variant_name}) {
+        my $filename = $class->create_readname_filename($variant_name);
+        $fh = IO::File->new($filename,"w") 
+            or die "Unable to open $filename to output readnames supporting $variant_name\n";
+        $filehandles_hashref->{$variant_name} = $fh;
+    }
+    else {
+        $fh = $filehandles_hashref->{$variant_name};
+    }
+    print $fh "$readname\n";
+}
