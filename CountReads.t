@@ -4,7 +4,10 @@ use strict;
 use warnings;
 
 use Test::More;
-
+use File::Temp;
+use File::chdir;
+use File::Basename;
+use Cwd 'abs_path';
 require_ok('CountReads');
 
 
@@ -28,4 +31,21 @@ my @variants = CountReads->variants_in_read($positions, 'G', 'T');
 is_deeply(\@variants, [$positions->[1]], "Variants returned correctly");
 
 is(CountReads->create_readname_filename("G16T,G30A,C253A"), "G16T_G30A_C253A_readnames.txt", "Filenames constructed correctly");
+
+#integration test
+my $src_dir = abs_path(dirname(__FILE__));
+my $test_data = "$src_dir/test_data/";
+my $input = "$test_data/test_read_variants.csv";
+my $expected_output = "$test_data/expected_output.txt";
+
+my $tempdir = File::Temp->newdir();
+local $CWD = $tempdir;
+system("perl $src_dir/CountReads.pm $input > test_output.csv 2>/dev/null") == 0
+    or die "Error running integration test\n";
+
+ok(!`diff $expected_output test_output.csv`, "Expected output produced");
+for my $file (glob "*_readnames.txt") {
+    ok(!`diff $test_data/expected_$file $file`, "Expected readnames match in $file");
+}
+
 done_testing();

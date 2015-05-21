@@ -1,0 +1,3 @@
+Variant(s)	Variant Supporting Reads	Total Spanning Reads	VAF
+G241T,G352A	2	7	28.571429%
+G241T,G352A,T333C	1	7	14.285714%
