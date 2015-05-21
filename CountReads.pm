@@ -45,6 +45,7 @@ sub run() {
     }
     print STDERR "Discarded $discarded non-spanning reads\n";
     print STDERR "Evaluated $spanning_counts spanning reads\n";
+    print "Variant(s)\tVariant Supporting Reads\tTotal Spanning Reads\tVAF\n";
     for my $variant (sort keys %variant_counts) {
         printf "%s\t%d\t%d\t%f%%\n", $variant, $variant_counts{$variant}, $spanning_counts, $variant_counts{$variant} / $spanning_counts * 100;
     }
