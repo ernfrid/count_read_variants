@@ -32,6 +32,9 @@ is_deeply(\@variants, [$positions->[1]], "Variants returned correctly");
 
 is(CountReads->create_readname_filename("G16T,G30A,C253A"), "G16T_G30A_C253A_readnames.txt", "Filenames constructed correctly");
 
+is(CountReads->correct_readname("read1"), "read1", "Readname correction doesn't screw up test data");
+is(CountReads->correct_readname("read1/1333/ccs"), "read1/1333", "Readname correction works");
+
 #integration test
 my $src_dir = abs_path(dirname(__FILE__));
 my $test_data = "$src_dir/test_data/";

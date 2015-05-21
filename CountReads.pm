@@ -29,7 +29,7 @@ sub run() {
             if(@variant_in_read) {
                 my $name = join(",", map {$_->{id}} @variant_in_read);
                 $variant_counts{$name} += 1;
-                $class->print_readname(\%file_handles, $name, $read_name);
+                $class->print_readname(\%file_handles, $name, $class->correct_readname($read_name));
             }
             $spanning_counts += 1;
         }
@@ -52,6 +52,12 @@ sub run() {
     for my $variant (sort keys %variant_counts) {
         printf "%s\t%d\t%d\t%f%%\n", $variant, $variant_counts{$variant}, $spanning_counts, $variant_counts{$variant} / $spanning_counts * 100;
     }
+}
+
+sub correct_readname {
+    my ($class, $name) = @_;
+    $name =~ s/\/ccs$//g;
+    return $name;
 }
 
 sub parse_header {
