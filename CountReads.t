@@ -19,7 +19,7 @@ is_deeply($parsed_variants, $positions, "Header parsed correctly");
 
 ok(CountReads->valid(qw( G C )), "Valid read identified");
 ok(!CountReads->valid(undef, undef), "Non-spanning read invalid");
-ok(!CountReads->valid(qw( G N )), "Read with N is invalid");
+ok(CountReads->valid(qw( G N )), "Read with N is valid");
 
 is(CountReads->variant_for_base($positions->[0], 'T'), $positions->[0], "Variant identified correctly");
 isnt(CountReads->variant_for_base($positions->[0], 'G'), $positions->[0], "Non-variant identified correctly");
@@ -27,4 +27,5 @@ isnt(CountReads->variant_for_base($positions->[0], 'G'), $positions->[0], "Non-v
 my @variants = CountReads->variants_in_read($positions, 'G', 'T');
 is_deeply(\@variants, [$positions->[1]], "Variants returned correctly");
 
+is(CountReads->create_readname_filename("G16T,G30A,C253A"), "G16T_G30A_C253A_readnames.txt", "Filenames constructed correctly");
 done_testing();
