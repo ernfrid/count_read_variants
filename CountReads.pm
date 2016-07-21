@@ -10,6 +10,23 @@ use IO::File;
 
 sub run() {
     my $class = shift;
+    my $ifh = shift;
+    unless($ifh) {
+        print STDERR $ARGV[0], "\n";
+        if ($ARGV[0]) {
+            $ifh = IO::File->new($ARGV[0], "r")
+                or die "Unable to open $ARGV[0]\n";
+        }
+        else {
+            $ifh = IO::File->new_from_fd(fileno(STDIN), "r")
+                or die "Unable to open filehandle to STDIN\n";
+        }
+    }
+    my $ofh = shift;
+    unless($ofh) {
+        $ofh = IO::File->new_from_fd(fileno(STDOUT), "w")
+            or die "Unable to open filehandle to STDOUT\n";
+    }
     my $variants;
     my %variant_counts;
     my %file_handles;
@@ -17,7 +34,7 @@ sub run() {
     my $spanning_counts = 0;
     my @position_counts;
 
-    while(<>) {
+    while(<$ifh>) {
         $_ =~ s/\R$//g;
         unless($variants) {
             $variants = $class->parse_header($_);
@@ -48,9 +65,9 @@ sub run() {
     }
     print STDERR "Discarded $discarded non-spanning reads\n";
     print STDERR "Evaluated $spanning_counts spanning reads\n";
-    print "Variant(s)\tVariant Supporting Reads\tTotal Spanning Reads\tVAF\n";
+    print $ofh "Variant(s)\tVariant Supporting Reads\tTotal Spanning Reads\tVAF\n";
     for my $variant (sort keys %variant_counts) {
-        printf "%s\t%d\t%d\t%f%%\n", $variant, $variant_counts{$variant}, $spanning_counts, $variant_counts{$variant} / $spanning_counts * 100;
+        printf $ofh "%s\t%d\t%d\t%f%%\n", $variant, $variant_counts{$variant}, $spanning_counts, $variant_counts{$variant} / $spanning_counts * 100;
     }
 }
 

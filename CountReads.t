@@ -41,14 +41,30 @@ my $test_data = "$src_dir/test_data/";
 my $input = "$test_data/test_read_variants.csv";
 my $expected_output = "$test_data/expected_output.txt";
 
-my $tempdir = File::Temp->newdir();
-local $CWD = $tempdir;
-system("perl $src_dir/CountReads.pm $input > test_output.csv 2>/dev/null") == 0
-    or die "Error running integration test\n";
+subtest "CLI Integration Test" => sub {
+    my $tempdir = File::Temp->newdir();
+    local $CWD = $tempdir;
+    system("perl $src_dir/CountReads.pm $input > test_output.csv 2>/dev/null") == 0
+        or die "Error running integration test\n";
 
-ok(!`diff $expected_output test_output.csv`, "Expected output produced");
-for my $file (glob "*_readnames.txt") {
-    ok(!`diff $test_data/expected_$file $file`, "Expected readnames match in $file");
-}
+    ok(!`diff $expected_output test_output.csv`, "Expected output produced");
+    for my $file (glob "*_readnames.txt") {
+        ok(!`diff $test_data/expected_$file $file`, "Expected readnames match in $file");
+    }
+};
+
+subtest "Package Integration Test" => sub {
+    my $tempdir = File::Temp->newdir();
+    local $CWD = $tempdir;
+
+    my $ifh = IO::File->new($input, "r") or die "Unable to open filehandle to read $input\n";
+    my $ofh = IO::File->new("test_output2.csv", "w") or die "Unable to open filehandle to write test_output2.csv\n";
+    CountReads->run($ifh, $ofh) == 0
+        or die "Error running integration test with filenames\n";
+    ok(!`diff $expected_output test_output2.csv`, "Expected output produced");
+    for my $file (glob "*_readnames.txt") {
+        ok(!`diff $test_data/expected_$file $file`, "Expected readnames match in $file");
+    }
+};
 
 done_testing();
